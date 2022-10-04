@@ -3,6 +3,7 @@ using Telegram.Bot.Exceptions;
 using Telegram.Bot.Polling;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
+using UrlCleanerBot.App;
 
 var botClient = new TelegramBotClient("5392615517:AAFTC5C2gAKmy65QMuNpznAO5SFWEZQqkhA");
 
@@ -41,14 +42,17 @@ async Task HandleUpdateAsync(ITelegramBotClient botClient, Update update, Cancel
 
     Console.WriteLine($"Received a '{messageText}' message in chat {chatId}.");
 
-    //await botClient.DeleteMessageAsync(message.Chat.Id, message.MessageId);
-
-    // Echo received message text
-    Message sentMessage = await botClient.SendTextMessageAsync(
-        chatId: chatId,
-        text: "You said:\n" + messageText,
-        replyToMessageId: message.MessageId,
-        cancellationToken: cancellationToken) ;
+    await Task.WhenAll(UrlCleaner.ExtractUrls(message.Text).Select(url =>
+    {
+        var cleanUrl = UrlCleaner.CleanUrl(url);
+        if (!string.IsNullOrEmpty(cleanUrl) && cleanUrl != url)
+            return botClient.SendTextMessageAsync(
+                    chatId: chatId,
+                    text: "Normal url:\n" + cleanUrl,
+                    replyToMessageId: message.MessageId,
+                    cancellationToken: cancellationToken);
+        return Task.CompletedTask;
+    }));
 }
 
 Task HandlePollingErrorAsync(ITelegramBotClient botClient, Exception exception, CancellationToken cancellationToken)
