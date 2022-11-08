@@ -12,7 +12,7 @@ using var cts = new CancellationTokenSource();
 // StartReceiving does not block the caller thread. Receiving is done on the ThreadPool.
 var receiverOptions = new ReceiverOptions
 {
-    AllowedUpdates = Array.Empty<UpdateType>() // receive all update types
+    AllowedUpdates = new[] { UpdateType.Message } // receive all update types
 };
 botClient.StartReceiving(
     updateHandler: HandleUpdateAsync,
@@ -42,11 +42,13 @@ async Task HandleUpdateAsync(ITelegramBotClient botClient, Update update, Cancel
 
     Console.WriteLine($"Received a '{messageText}' message in chat {chatId}.");
 
+
     await Task.WhenAll(UrlCleaner.ExtractUrls(message.Text).Select(url =>
     {
         var cleanUrl = UrlCleaner.CleanUrl(url);
         if (!string.IsNullOrEmpty(cleanUrl) && cleanUrl != url)
             return botClient.SendTextMessageAsync(
+
                     chatId: chatId,
                     text: "Normal url:\n" + cleanUrl,
                     replyToMessageId: message.MessageId,

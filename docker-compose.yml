@@ -1,0 +1,8 @@
+version: '3.4'
+
+services:
+  urlcleanerbot.app:
+    image: ${DOCKER_REGISTRY-}urlcleanerbot
+    build:
+      context: .
+      dockerfile: UrlCleanerBotApp/Dockerfile
