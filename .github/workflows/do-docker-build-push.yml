@@ -4,12 +4,11 @@ env:
   IMAGE_NAME: "tg_bit_url_cleaner"
 
 
-on: workflow_dispatch
-
-#   push:
-#     branches: [ "master" ]
-#   pull_request:
-#     branches: [ "master" ]
+on:
+   push:
+     branches: [ "master" ]
+   pull_request:
+     branches: [ "master" ]
 
 jobs:
 
@@ -18,6 +17,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - run: ls
       - name: Build container image
         run: docker build -t $(echo $REGISTRY)/$(echo $IMAGE_NAME):$(echo $GITHUB_SHA | head -c7) -f ./UrlCleanerBotApp/Dockerfile .
 
